@@ -109,37 +109,56 @@ export default function WhatsAppCRM() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="text-2xl text-gray-600">Loading WhatsApp CRM...</div>
+      <div className="flex items-center justify-center h-screen bg-emerald-900 bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-900">
+        <div className="rounded-2xl bg-white/95 px-8 py-6 shadow-2xl">
+          <div className="text-center text-2xl font-semibold text-emerald-800">
+            Loading WhatsApp CRM...
+          </div>
+          <div className="mt-2 text-center text-sm text-emerald-600">
+            Connecting to your WhatsApp backend. Please wait.
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-emerald-900 bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-900">
       {/* Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 bg-green-600 text-white text-xl font-bold">WhatsApp CRM</div>
+      <div className="flex w-80 flex-col border-r border-black/10 bg-emerald-950/70 backdrop-blur-md">
+        <div className="border-b border-emerald-900 bg-emerald-700/90 px-4 py-3 text-lg font-semibold text-white shadow-md">
+          WhatsApp CRM
+        </div>
         {error && (
-          <div className="p-3 bg-red-50 border-b border-red-200 text-red-700 text-sm">
-            <div className="font-semibold">Connection Error</div>
-            <div className="text-xs mt-1">{error}</div>
+          <div className="border-b border-red-500/40 bg-red-900/60 px-3 py-2 text-sm text-red-100">
+            <div className="font-semibold">Connection error</div>
+            <div className="mt-1 text-xs opacity-90">{error}</div>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-emerald-950/40">
           {contacts.map((contact) => (
             <div
               key={contact.id}
               onClick={() => setSelectedContact(contact)}
-              className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition ${selectedContact?.phone === contact.phone ? "bg-green-50" : ""}`}
+              className={`cursor-pointer border-b border-emerald-900/60 px-4 py-3 text-sm transition-colors hover:bg-emerald-900/80 ${
+                selectedContact?.phone === contact.phone
+                  ? "bg-emerald-800/80"
+                  : "bg-transparent"
+              }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {contact.name ? contact.name[0].toUpperCase() : <Phone className="w-6 h-6" />}
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white shadow-md">
+                  {contact.name ? (
+                    contact.name[0].toUpperCase()
+                  ) : (
+                    <Phone className="h-4 w-4" />
+                  )}
                 </div>
                 <div>
-                  <div className="font-medium">{contact.name || contact.phone}</div>
-                  <div className="text-sm text-gray-500">{contact.phone}</div>
+                  <div className="text-sm font-medium text-emerald-50">
+                    {contact.name || contact.phone}
+                  </div>
+                  <div className="text-xs text-emerald-200/80">{contact.phone}</div>
                 </div>
               </div>
             </div>
@@ -148,26 +167,41 @@ export default function WhatsAppCRM() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-1 flex-col">
         {selectedContact ? (
           <>
-            <div className="bg-green-600 text-white p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-white text-green-600 rounded-full flex items-center justify-center font-bold">
-                {selectedContact.name?.[0] || <User className="w-5 h-5" />}
+            <div className="flex items-center gap-3 border-b border-black/10 bg-emerald-700/90 px-5 py-3 text-white shadow-md backdrop-blur-md">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm font-semibold text-emerald-700 shadow-md">
+                {selectedContact.name?.[0] || <User className="h-5 w-5" />}
               </div>
               <div>
-                <div className="font-medium">{selectedContact.name || selectedContact.phone}</div>
-                <div className="text-sm opacity-90">{selectedContact.phone}</div>
+                <div className="text-sm font-semibold">
+                  {selectedContact.name || selectedContact.phone}
+                </div>
+                <div className="text-xs opacity-90">{selectedContact.phone}</div>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+            <div className="flex-1 space-y-3 overflow-y-auto bg-[radial-gradient(circle_at_top,_#ffffff_0,_#e5ddd5_55%,_#d1c4a6_100%)] px-6 py-5">
               {messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.fromMe ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-md px-4 py-2 rounded-lg ${msg.fromMe ? "bg-green-500 text-white" : "bg-white border"}`}>
-                    <p className="whitespace-pre-wrap">{msg.body}</p>
-                    <div className={`text-xs mt-1 flex items-center gap-1 ${msg.fromMe ? "text-green-100" : "text-gray-500"}`}>
-                      <Clock className="w-3 h-3" />
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.fromMe ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-md rounded-lg px-4 py-2 text-sm shadow-sm ${
+                      msg.fromMe
+                        ? "bg-[#dcf8c6] text-emerald-950"
+                        : "bg-white text-gray-900"
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap leading-relaxed">{msg.body}</p>
+                    <div
+                      className={`mt-1 flex items-center gap-1 text-[11px] ${
+                        msg.fromMe ? "text-emerald-900/70" : "text-gray-500"
+                      }`}
+                    >
+                      <Clock className="h-3 w-3" />
                       {formatTime(msg.timestamp)}
                     </div>
                   </div>
@@ -176,8 +210,8 @@ export default function WhatsAppCRM() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Send Box — NOW WORKING! */}
-            <div className="bg-white border-t p-4">
+            {/* Send Box */}
+            <div className="border-t border-black/5 bg-[#f0f0f0]/95 px-4 py-3 shadow-inner backdrop-blur">
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -185,21 +219,26 @@ export default function WhatsAppCRM() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                   placeholder="Type a message..."
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm outline-none placeholder:text-gray-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/30"
                 />
                 <button
                   onClick={sendMessage}
                   disabled={sending || !inputMessage.trim()}
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
-                  <Send className="w-5 h-5" /> {sending ? "Sending..." : "Send"}
+                  <Send className="h-4 w-4" /> {sending ? "Sending..." : "Send"}
                 </button>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500 text-xl">
-            Select a contact to start chatting
+          <div className="flex flex-1 items-center justify-center bg-[radial-gradient(circle_at_top,_#ffffff_0,_#e5ddd5_55%,_#d1c4a6_100%)]">
+            <div className="rounded-xl bg-white/90 px-8 py-6 text-center text-gray-700 shadow-xl">
+              <div className="text-lg font-semibold">Welcome to WhatsApp CRM</div>
+              <div className="mt-2 text-sm text-gray-500">
+                Select a contact from the list on the left to view and send messages.
+              </div>
+            </div>
           </div>
         )}
       </div>
