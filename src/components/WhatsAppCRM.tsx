@@ -11,18 +11,34 @@ export default function WhatsAppCRM() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [inputMessage, setInputMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasShownErrorRef = useRef(false);
 
   // Load contacts
   useEffect(() => {
+    let isFirstLoad = true;
     const loadContacts = async () => {
       try {
         const data = await api.getContacts();
         setContacts(data);
-      } catch (err) {
-        console.error("Failed to load contacts");
-      } finally {
         setLoading(false);
+        setError(null);
+        hasShownErrorRef.current = false; // Reset error flag on success
+        isFirstLoad = false;
+      } catch (err) {
+        console.error("Failed to load contacts:", err);
+        setLoading(false);
+        const errorMessage = err instanceof Error ? err.message : "Failed to connect to backend";
+        setError(errorMessage);
+        // Show error to user only once on initial load failure
+        if (isFirstLoad && !hasShownErrorRef.current) {
+          hasShownErrorRef.current = true;
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+          alert(`Failed to connect to backend at ${apiUrl}.\n\nPlease ensure the backend server is running.\n\nError: ${errorMessage}`);
+          isFirstLoad = false;
+        }
       }
     };
     loadContacts();
@@ -53,13 +69,17 @@ export default function WhatsAppCRM() {
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || !selectedContact) return;
+    if (!inputMessage.trim() || !selectedContact || sending) return;
 
+    const messageText = inputMessage.trim();
+    setSending(true);
+    setInputMessage("");
+    
     const tempMessage: Message = {
       id: Date.now(),
       whatsappMessageId: null,
       contactPhone: selectedContact.phone,
-      body: inputMessage,
+      body: messageText,
       fromMe: true,
       timestamp: new Date().toISOString(),
       createdAt: new Date().toISOString(),
@@ -67,22 +87,22 @@ export default function WhatsAppCRM() {
 
     // Show instantly (optimistic UI)
     setMessages(prev => [...prev, tempMessage]);
-    setInputMessage("");
     scrollToBottom();
 
     // Send to backend
-    try {
-      await fetch("http://localhost:8080/api/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: selectedContact.phone,
-          message: inputMessage
-        })
-      });
-    } catch (err) {
-      alert("Failed to send message. Check backend.");
+    const result = await api.sendMessage({
+      phone: selectedContact.phone,
+      message: messageText,
+    });
+
+    setSending(false);
+
+    if (!result.success) {
+      // Remove the optimistic message and show error
+      setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
+      alert(`Failed to send message: ${result.error || "Unknown error"}`);
     }
+    // If successful, the message will be updated when we refresh messages
   };
 
   const formatTime = (ts: string) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -100,6 +120,12 @@ export default function WhatsAppCRM() {
       {/* Sidebar */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 bg-green-600 text-white text-xl font-bold">WhatsApp CRM</div>
+        {error && (
+          <div className="p-3 bg-red-50 border-b border-red-200 text-red-700 text-sm">
+            <div className="font-semibold">Connection Error</div>
+            <div className="text-xs mt-1">{error}</div>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto">
           {contacts.map((contact) => (
             <div
@@ -163,9 +189,10 @@ export default function WhatsAppCRM() {
                 />
                 <button
                   onClick={sendMessage}
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+                  disabled={sending || !inputMessage.trim()}
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-5 h-5" /> Send
+                  <Send className="w-5 h-5" /> {sending ? "Sending..." : "Send"}
                 </button>
               </div>
             </div>
