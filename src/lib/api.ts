@@ -1,5 +1,5 @@
 // src/lib/api.ts
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://whatsapp-crm-production.up.railway.app/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
 export interface Contact {
   id: number;

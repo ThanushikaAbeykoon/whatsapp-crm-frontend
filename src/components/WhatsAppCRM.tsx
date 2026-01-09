@@ -35,7 +35,7 @@ export default function WhatsAppCRM() {
         // Show error to user only once on initial load failure
         if (isFirstLoad && !hasShownErrorRef.current) {
           hasShownErrorRef.current = true;
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://whatsapp-crm-production.up.railway.app/api";
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
           alert(`Failed to connect to backend at ${apiUrl}.\n\nPlease ensure the backend server is running.\n\nError: ${errorMessage}`);
           isFirstLoad = false;
         }
